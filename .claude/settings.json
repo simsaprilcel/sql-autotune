@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./prepare.sh:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git log:*)",
+      "Bash(git status:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(grep:*)",
+      "Bash(tail:*)",
+      "Read(./program.md)",
+      "Read(./query.sql)",
+      "Read(./config.sh)",
+      "Read(./results.tsv)",
+      "Edit(./query.sql)"
+    ],
+    "deny": [
+      "Read(./baseline_results.csv)",
+      "Read(./run_results.csv)",
+      "Read(./run_raw.csv)",
+      "Bash(sql:*)",
+      "Bash(sqlplus:*)",
+      "Read(./.env)",
+      "Read(**/*wallet*)",
+      "Read(**/cwallet.sso)",
+      "Read(**/ewallet.p12)",
+      "Read(**/id_rsa*)",
+      "Read(**/.ssh/**)"
+    ]
+  }
+}

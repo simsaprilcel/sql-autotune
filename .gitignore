@@ -1,0 +1,12 @@
+# Harness output
+run.log
+run*.log
+run_results.csv
+run_raw.csv
+results.tsv
+
+# Holds real result rows (may include protected student data) — never commit.
+baseline_results.csv
+
+# Local-only Claude Code settings
+.claude/settings.local.json
