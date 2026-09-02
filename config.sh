@@ -13,7 +13,7 @@
 #   CONNECTION="/@MY_WALLET_ALIAS"                # Oracle wallet — no password on disk
 #   CONNECTION="scott/tiger@MYDB"                 # user/pass@TNS
 #   CONNECTION="scott/tiger@//host:1521/service"  # Easy Connect
-CONNECTION="/@YOUR_WALLET_ALIAS"
+CONNECTION="/@PROGSAGE"
 
 # Bind variable substitutions.
 # query.sql can use :name placeholders. Each entry maps a name to a literal
@@ -23,11 +23,11 @@ CONNECTION="/@YOUR_WALLET_ALIAS"
 #
 # Leave empty if your query has no bind variables.
 BINDS=(
-    "term_code=202510"
+    "max_tables=1500"
 )
 
 # Maximum experiment iterations (including the baseline run).
 MAX_ITERATIONS=20
 
 # Query timeout in seconds. Runs exceeding this are killed and marked as crash.
-QUERY_TIMEOUT=120
+QUERY_TIMEOUT=300
