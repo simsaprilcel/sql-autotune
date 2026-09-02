@@ -1,0 +1,22 @@
+{
+  "tools": {
+    "allowed": [
+      "run_shell_command(./prepare.sh)",
+      "run_shell_command(git add)",
+      "run_shell_command(git commit)",
+      "run_shell_command(git reset)",
+      "run_shell_command(git log)",
+      "run_shell_command(git status)",
+      "run_shell_command(git rev-parse)",
+      "run_shell_command(grep)",
+      "run_shell_command(tail)"
+    ],
+    "exclude": [
+      "run_shell_command(sql)",
+      "run_shell_command(sqlplus)"
+    ]
+  },
+  "model": {
+    "maxSessionTurns": 110
+  }
+}

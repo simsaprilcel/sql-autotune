@@ -6,7 +6,7 @@ Give an agent a slow query, a query-only database connection, and a metric. It m
 
 Inspired by Karpathy's [autoresearch](https://github.com/karpathy/autoresearch) — the same loop, applied to SQL instead of neural network training.
 
-**Presentation materials** for this repo live in [`presentation/`](presentation/); the Claude command-line setup guide is [`docs/claude-cli-setup.md`](docs/claude-cli-setup.md).
+**Presentation materials** for this repo live in [`presentation/`](presentation/); the Claude command-line setup guide is [`docs/claude-cli-setup.md`](docs/claude-cli-setup.md). A Gemini CLI variant (`start-gemini.sh`, [`docs/gemini-cli-setup.md`](docs/gemini-cli-setup.md)) is also included — the loop and harness are agent-agnostic, but the permission model is not a 1:1 swap; see that doc's §5.
 
 ## How it works
 
