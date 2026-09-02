@@ -17,7 +17,7 @@
 -- ---------------------------------------------------------------------------
 
 WITH tabs AS (
-         SELECT o.owner, o.object_type, o.object_name, o.subobject_name
+         SELECT /*+ NO_MERGE */ o.owner, o.object_type, o.object_name, o.subobject_name
            FROM dba_objects o
           WHERE o.object_type = 'TABLE'
             AND o.object_name NOT LIKE 'BIN$%'),
