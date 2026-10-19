@@ -106,9 +106,26 @@ run_session() {
     echo "============================================"
     echo ""
 
-    claude -p "$PROMPT" \
+    # JSON output carries token usage and cost; it arrives in one piece when
+    # the session ends, so there is no streamed text while the agent works.
+    local status=0 out
+    out=$(claude -p "$PROMPT" \
         --allowedTools "Edit,Read,Write,Bash,Glob,Grep" \
-        --max-turns "$MAX_TURNS"
+        --max-turns "$MAX_TURNS" \
+        --output-format json) || status=$?
+
+    # One line per session, so --loop runs can be summed afterwards
+    echo "$out" | jq -c --arg iter "$MAX_ITERATIONS" '{
+        ended: (now | todate), iterations: ($iter | tonumber),
+        num_turns, total_cost_usd, usage
+    }' >> usage.jsonl 2>/dev/null || true
+
+    echo "$out" | jq -r '.result // empty' 2>/dev/null || echo "$out"
+    echo ""
+    echo "$out" | jq -r '"Turns: \(.num_turns)  Cost: $\(.total_cost_usd)
+Tokens: input \(.usage.input_tokens), cache read \(.usage.cache_read_input_tokens), cache write \(.usage.cache_creation_input_tokens), output \(.usage.output_tokens)"' 2>/dev/null || true
+
+    return "$status"
 }
 
 if [ "$LOOP" = true ]; then

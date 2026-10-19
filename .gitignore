@@ -3,6 +3,7 @@ run.log
 run*.log
 run_results.csv
 run_raw.csv
+usage.jsonl
 results.tsv
 
 # Holds real result rows (may include protected student data) — never commit.

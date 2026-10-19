@@ -49,6 +49,7 @@ The agent sees **structure, not data**. Result rows stay on the machine; only th
 - [Claude Code](https://docs.claude.com/en/docs/claude-code) CLI, installed and authenticated — see [`docs/claude-cli-setup.md`](docs/claude-cli-setup.md)
 - [Oracle SQLcl](https://www.oracle.com/database/sqldeveloper/technologies/sqlcl/) (`sql`) — or adapt `prepare.sh`, see below
 - Git
+- `jq` (optional) — for the token usage summary and `usage.jsonl`; without it `start.sh` prints the raw JSON
 - A query-only database account, ideally against a non-production instance
 
 ## Quick start
@@ -83,6 +84,34 @@ tmux new -s autotune './start.sh --loop 50'
 
 State lives in git and `results.tsv`, not in the session, so restarting is safe — the agent reads `results.tsv` and picks up where it left off.
 
+### Token usage
+
+These are estimates, not measurements. Each experiment takes about 5 agent turns, and every turn re-sends the whole conversation, so input tokens grow faster than linearly with iterations. Most input is billed as prompt-cache reads.
+
+| Run | Iterations | Agent turns | Input tokens (mostly cache reads) | Output tokens |
+|---|---|---|---|---|
+| Minimal: `./start.sh 3` | 3 (baseline + 2 experiments) | ~15–20 | ~0.4–0.7M | ~10–25K |
+| Default: `./start.sh` | 20 | ~100 | ~4–6M | ~50–150K |
+| Long: `./start.sh 50` | 50 | ~250 | ~20–30M | ~150–350K |
+
+Start with the minimal run. It confirms the connection, baseline and correctness check work, and often catches the biggest win (a correlated subquery or per-row function call), for a small fraction of the default run's tokens. For long runs, prefer `--loop` with smaller batches over one very long session.
+
+`start.sh` runs Claude with `--output-format json`, so the agent's text appears only when the session ends. Each session's actual turns, token usage and cost are printed then and appended to `usage.jsonl` (gitignored). Sum the cost across `--loop` sessions with:
+
+```bash
+jq -s 'map(.total_cost_usd) | add' usage.jsonl
+```
+
+### Plan before you run
+
+Plan mode can't run the loop itself: it is read-only, and every experiment edits `query.sql`, commits, and executes SQL through `prepare.sh`. It is a cheap way to start a run with better ideas, though:
+
+1. Run `claude` in this directory and press Shift+Tab until plan mode is on.
+2. Ask it to read `query.sql` and `program.md` and propose a ranked list of rewrites. This takes a few turns, roughly 30–50K tokens.
+3. Review the list. Add the ideas worth trying to `program.md` as hints, then run `./start.sh 3` so the minimal run tries them first.
+
+The proposals are guesses until the loop tests them. Only the timed runs and the baseline diff decide what is kept.
+
 ## Two requirements for your query
 
 **A deterministic `ORDER BY`.** Correctness is a byte-for-byte diff against the baseline. A query whose row order can vary between runs will produce spurious `FAIL` results. Order by enough columns to make the result set unique.
@@ -111,7 +140,7 @@ The git log on the branch shows only the `keep` commits — a clean progression 
 - **Wall-clock floor.** Every `prepare.sh` invocation pays a fresh SQLcl JVM startup — a few seconds before any SQL runs. Once a query is fast, that floor dominates and further gains stop showing up in `elapsed_seconds`. Judge the tail end by execution plan and buffer gets.
 - **Query text only.** No indexes, no statistics, no materialized views, no schema changes — sometimes exactly what a slow query actually needs.
 - **One query at a time.** Not a workload tuner.
-- **Cost is real.** A long run makes many API calls; `--max-turns` (set by `start.sh`) is the backstop.
+- **Cost is real.** A long run makes many API calls; `--max-turns` (set by `start.sh`) is the backstop. See [Token usage](#token-usage).
 - **A human still reads the final plan** before anything ships. This replaces the tedium of tuning, not the judgment.
 
 ## Adapting for other databases
